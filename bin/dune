@@ -1,4 +1,3 @@
 (executable
  (public_name mlrpn)
- (name main)
- (libraries mlrpn))
+ (name main))
