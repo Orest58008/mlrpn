@@ -4,8 +4,9 @@
 
 (generate_opam_files true)
 
-; (source
- ; (github username/reponame))
+(source
+ ; (codeberg orest58008/mlrpn)
+ (github orest58008/mlrpn))
 
 (authors "Orest I")
 
