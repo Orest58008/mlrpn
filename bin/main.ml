@@ -11,6 +11,18 @@ let rec calc stack args =
                                 | first :: second :: rest ->
                                    calc ((Float.add first second) :: rest) unprocd
                                 | _ -> raise (Failure "Provide more arguments!!"))
+                      | "-" -> (match stack with
+                                | first :: second :: rest ->
+                                   calc ((Float.sub first second) :: rest) unprocd
+                                | _ -> raise (Failure "Provide more arguments!!"))
+                      | "x" -> (match stack with
+                                | first :: second :: rest ->
+                                   calc ((Float.mul first second) :: rest) unprocd
+                                | _ -> raise (Failure "Provide more arguments!!"))
+                      | "/" -> (match stack with
+                                | first :: second :: rest ->
+                                   calc ((Float.div first second) :: rest) unprocd
+                                | _ -> raise (Failure "Provide more arguments!!"))
                       | other -> (match float_of_string_opt other with
                                   | None -> raise (Invalid_argument other)
                                   | Some num -> calc (num :: stack) unprocd)
