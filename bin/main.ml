@@ -1,3 +1,13 @@
+let binary_of_name name =
+  match name with
+  | "+"  -> Float.add
+  | "-"  -> Float.sub
+  | "x"  -> Float.mul
+  | "/"  -> Float.div
+  | "xx" -> Float.pow
+  | _ -> raise (Invalid_argument name)
+;;
+
 let rec calc stack args =
   match args with
   | [] -> if List.length stack > 1 then
@@ -6,26 +16,17 @@ let rec calc stack args =
             raise (Failure "Provide some arguments!!")
           else
             print_endline (string_of_float (List.hd stack))
-  | arg :: unprocd -> match arg with
-                      | "+" -> (match stack with
-                                | first :: second :: rest ->
-                                   calc ((Float.add first second) :: rest) unprocd
-                                | _ -> raise (Failure "Provide more arguments!!"))
-                      | "-" -> (match stack with
-                                | first :: second :: rest ->
-                                   calc ((Float.sub first second) :: rest) unprocd
-                                | _ -> raise (Failure "Provide more arguments!!"))
-                      | "x" -> (match stack with
-                                | first :: second :: rest ->
-                                   calc ((Float.mul first second) :: rest) unprocd
-                                | _ -> raise (Failure "Provide more arguments!!"))
-                      | "/" -> (match stack with
-                                | first :: second :: rest ->
-                                   calc ((Float.div first second) :: rest) unprocd
-                                | _ -> raise (Failure "Provide more arguments!!"))
-                      | other -> (match float_of_string_opt other with
-                                  | None -> raise (Invalid_argument other)
-                                  | Some num -> calc (num :: stack) unprocd)
-;;
+  | arg :: unprocd -> (match stack with
+                       | first::second::rest -> (try
+                                                   let res = (binary_of_name arg) second first
+                                                   in calc (res::rest) unprocd
+                                                 with
+                                                 | Invalid_argument _ ->
+                                                    let num = float_of_string arg
+                                                    in calc (num::stack) unprocd
+                                                ) 
+                       | _ -> let num = float_of_string arg
+                              in calc (num::stack) unprocd
+                      );;
 
 calc [] (List.tl (Array.to_list Sys.argv));;
