@@ -16,15 +16,11 @@ let open Hashtbl in                (* It isn't critical, but it speeds things up
 
 let tbl_contains tbl key =
   match Hashtbl.find_opt tbl key with
-  | None -> false
-  | Some _ -> true
-;;
+  | None -> false | Some _ -> true ;;
 
 let is_float str =
   match float_of_string_opt str with
-  | None -> false
-  | Some _ -> true
-;;
+  | None -> false | Some _ -> true ;;
 
 let rec calc stack args =
   match args with
@@ -38,14 +34,12 @@ let rec calc stack args =
      (match stack with
       | second::first::rest -> let res = ((Hashtbl.find binary_ops arg) first second) in
                                calc (res::rest) unprocd
-      | _ -> raise (Failure "Provide more arguments!!")
-     )
+      | _ -> raise (Failure "Provide more arguments!!"))
   | arg::unprocd when tbl_contains unary_ops arg ->
      (match stack with
       | first::rest -> let res = ((Hashtbl.find unary_ops arg) first) in
                                calc (res::rest) unprocd
-      | _ -> raise (Failure "Provide more arguments!!")
-     )
+      | _ -> raise (Failure "Provide more arguments!!"))
   | arg::unprocd when is_float arg -> calc ((float_of_string arg)::stack) unprocd
   | arg::_ -> raise (Invalid_argument arg)
 ;;
