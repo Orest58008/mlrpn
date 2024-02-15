@@ -9,9 +9,11 @@ let open Hashtbl in                 (* It isn't critical, but it speeds things u
 
 let unary_ops = Hashtbl.create 3;; (* Please increase when adding new operations *)
 let open Hashtbl in                (* It isn't critical, but it speeds things up *)
-    add unary_ops "sin" Float.sin;
-    add unary_ops "cos" Float.cos;
-    add unary_ops "tan" Float.tan;
+    add unary_ops "sin"  Float.sin;
+    add unary_ops "cos"  Float.cos;
+    add unary_ops "tan"  Float.tan;
+    add unary_ops "sqrt" Float.sqrt;
+    add unary_ops "cbrt" Float.cbrt;
 ;;
 
 let tbl_contains tbl key =
@@ -44,4 +46,4 @@ let rec calc stack args =
   | arg::_ -> raise (Invalid_argument arg)
 ;;
 
-calc [] (List.tl (Array.to_list Sys.argv));;
+calc [] (Sys.argv |> Array.to_list |> List.tl);;
