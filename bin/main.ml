@@ -1,49 +1,30 @@
-let binary_ops = Hashtbl.create 5;; (* Please increase when adding new operations *)
-let open Hashtbl in                 (* It isn't critical, but it speeds things up *)
-    add binary_ops "+"  Float.add;
-    add binary_ops "-"  Float.sub;
-    add binary_ops "x"  Float.mul;
-    add binary_ops "/"  Float.div;
-    add binary_ops "xx" Float.pow;
-;;
+let binary_of_name name =
+  match name with | "+" -> ( +.) | "-" -> ( -.) | "x" -> ( *.) | "/" -> ( /.)
+                  | "xx" -> ( ** )
+                  | _ -> raise Not_found
+let unary_of_name name =
+  match name with | "sin" -> sin | "cos" -> cos | "tan" -> tan
+                  | "sqrt" -> sqrt | "cbrt" -> Float.cbrt
+                  | _ -> raise Not_found
 
-let unary_ops = Hashtbl.create 3;; (* Please increase when adding new operations *)
-let open Hashtbl in                (* It isn't critical, but it speeds things up *)
-    add unary_ops "sin"  Float.sin;
-    add unary_ops "cos"  Float.cos;
-    add unary_ops "tan"  Float.tan;
-    add unary_ops "sqrt" Float.sqrt;
-    add unary_ops "cbrt" Float.cbrt;
-;;
+let stack : float Stack.t = Stack.create ()
 
-let tbl_contains tbl key =
-  match Hashtbl.find_opt tbl key with
-  | None -> false | Some _ -> true ;;
+let calc arg : unit =
+  try let op = binary_of_name arg in
+      let y = Stack.pop stack in
+      let x = Stack.pop stack in
+      Stack.push (op x y) stack
+  with
+  | Stack.Empty -> raise (Failure "Provide more arguments")
+  | Not_found ->
+     try let op = unary_of_name arg in
+         let x = Stack.pop stack in
+         Stack.push (op x) stack
+     with
+     | Stack.Empty -> raise (Failure "Provide more arguments")
+     | Not_found -> try Stack.push (float_of_string arg) stack
+                    with Failure _ -> raise (Failure ("Invalid argument " ^ arg))
 
-let is_float str =
-  match float_of_string_opt str with
-  | None -> false | Some _ -> true ;;
-
-let rec calc stack args =
-  match args with
-  | [] -> if List.length stack > 1 then
-            raise (Failure "Too many arguments!!")
-          else if List.length stack < 1 then
-            raise (Failure "Provide some arguments!!")
-          else
-            print_endline (string_of_float (List.hd stack))
-  | arg::unprocd when tbl_contains binary_ops arg ->
-     (match stack with
-      | second::first::rest -> let res = ((Hashtbl.find binary_ops arg) first second) in
-                               calc (res::rest) unprocd
-      | _ -> raise (Failure "Provide more arguments!!"))
-  | arg::unprocd when tbl_contains unary_ops arg ->
-     (match stack with
-      | first::rest -> let res = ((Hashtbl.find unary_ops arg) first) in
-                               calc (res::rest) unprocd
-      | _ -> raise (Failure "Provide more arguments!!"))
-  | arg::unprocd when is_float arg -> calc ((float_of_string arg)::stack) unprocd
-  | arg::_ -> raise (Invalid_argument arg)
-;;
-
-calc [] (Sys.argv |> Array.to_list |> List.tl);;
+let () = Array.sub Sys.argv 1 (Array.length Sys.argv - 1) |> Array.iter calc
+let () = if Stack.length stack > 1 then raise (Failure "Too many arguments")
+         else Stack.pop stack |> print_float |> print_newline
